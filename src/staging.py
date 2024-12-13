@@ -16,8 +16,8 @@ def get_input_data() -> tuple[pl.DataFrame, pl.DataFrame]:
             - match_results_df: DataFrame containing match results data
             - innings_results_df: DataFrame containing innings results data
     """
-    match_results_df = pl.read_parquet("data/match_results.parquet")
-    innings_results_df = pl.read_parquet("data/innings_results.parquet")
+    match_results_df = pl.read_parquet(f"{INPUT_DIR}/match_results.parquet")
+    innings_results_df = pl.read_parquet(f"{INPUT_DIR}/innings_results.parquet")
 
     return match_results_df, innings_results_df
 
@@ -52,8 +52,13 @@ def join_input_data(match_results_df: pl.DataFrame, innings_results_df: pl.DataF
         .with_columns(
             over=pl.col("over").cast(pl.UInt8),
             ball=pl.col("ball").cast(pl.UInt8),
-            wicket=pl.col("wicket.player_out").is_not_null().cast(pl.UInt8),
+            wicket=pl.col("wicket.player_out")
+            .is_not_null()
+            .cast(pl.UInt8),  # unnesting like I did caused multiple rows for wicket player
+            rn=pl.col("wicket.player_out").rank("ordinal").over(["matchid", "over", "innings", "team"]),
         )
+        .filter(pl.col("rn") == 1)
+        .drop("rn")
     )
 
     return df
@@ -65,9 +70,18 @@ def aggregate_input_data(df: pl.DataFrame) -> pl.DataFrame:
     per `team`, `matchid`, `over`, and `ball`. This is used to to make a dataset
     with the run and wicket outcomes for each delivery in a match.
     """
-    return df.group_by(["team", "matchid", "over", "ball"]).agg(
-        runs=pl.col("runs.total").sum(), wickets=pl.col("wicket").sum()
+
+    df = (
+        df.group_by(["team", "matchid", "innings", "over", "ball"])
+        .agg(runs=pl.col("runs.total").sum(), wickets=pl.col("wicket").sum())
+        .with_columns(
+            total_runs=pl.col("runs").cum_sum().over(["team", "matchid"], order_by=["over", "ball"]),
+            total_wickets=pl.col("wickets").cum_sum().over(["team", "matchid"], order_by=["over", "ball"]),
+        )
+        .with_columns(overs_remaining=50 - pl.col("over") - 1, wickets_remaining=10 - pl.col("total_wickets"))
     )
+
+    return df
 
 
 def main() -> None:

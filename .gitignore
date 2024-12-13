@@ -14,3 +14,6 @@ data/
 
 # Misc
 .DS_Store
+
+# Models
+models/

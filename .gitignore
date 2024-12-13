@@ -11,7 +11,7 @@ wheels/
 
 # Raw data
 data/
-
+report/
 # Misc
 .DS_Store
 

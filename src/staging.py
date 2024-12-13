@@ -1,4 +1,10 @@
 import polars as pl
+import os
+import convert_file
+
+INPUT_DIR = "data"
+OUTPUT_DIR = "report"
+assert os.path.exists(INPUT_DIR), "'data/' doesn't exits"
 
 
 def get_input_data() -> tuple[pl.DataFrame, pl.DataFrame]:
@@ -82,10 +88,16 @@ def main() -> None:
     Returns:
         None
     """
+    matches = os.path.isfile(f"{INPUT_DIR}/match_results.parquet")
+    innings = os.path.isfile(f"{INPUT_DIR}/innings_results.parquet")
+
+    if not all([matches, innings]):
+        convert_file.main()
+
     match_results_df, innings_results_df = get_input_data()
     df = join_input_data(match_results_df, innings_results_df)
     df = aggregate_input_data(df)
-    df.write_csv("report/q3a.csv")
+    df.write_csv(f"{OUTPUT_DIR}/q3a.csv")
 
 
 if __name__ == "__main__":

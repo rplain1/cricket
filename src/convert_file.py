@@ -5,6 +5,7 @@ import duckdb
 # it makes sense to. Having it in an agreed on parquet format lets me use
 # Positron to read in the data with R and do the initial EDA iterations
 # more quickly
+# TODO: add checking if file exists, if not run this code
 if __name__ == "__main__":
     duckdb.execute("""
         COPY (SELECT * FROM 'data/match_results.json')

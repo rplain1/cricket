@@ -5,8 +5,16 @@ import duckdb
 # it makes sense to. Having it in an agreed on parquet format lets me use
 # Positron to read in the data with R and do the initial EDA iterations
 # more quickly
-# TODO: add checking if file exists, if not run this code
-if __name__ == "__main__":
+
+
+def main() -> None:
+    """
+    Convert the nested json input data into a parquet format that is in the form
+    of a 2 dimensional table.
+
+    Returns:
+        None
+    """
     duckdb.execute("""
         COPY (SELECT * FROM 'data/match_results.json')
         TO 'data/match_results.parquet' (FORMAT PARQUET);
@@ -16,3 +24,7 @@ if __name__ == "__main__":
         COPY (from read_json('data/innings_results.json', maximum_depth = -1, sample_size = -1))
         TO 'data/innings_results.parquet' (FORMAT PARQUET);
     """)
+
+
+if __name__ == "__main__":
+    main()

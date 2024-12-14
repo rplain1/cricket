@@ -44,7 +44,7 @@ def join_input_data(match_results_df: pl.DataFrame, innings_results_df: pl.DataF
     """
     df = (
         match_results_df.filter((pl.col("result").is_null()) & (pl.col("gender") == "male"))
-        .group_by(["matchid"])
+        .group_by(["matchid", "dates"])
         .len()
         .join(
             innings_results_df.select(
@@ -55,6 +55,7 @@ def join_input_data(match_results_df: pl.DataFrame, innings_results_df: pl.DataF
         .with_columns(pl.col("over").str.split_exact(".", 1).struct.rename_fields(["over", "ball"]))
         .unnest("over")
         .with_columns(
+            dates=pl.col("dates").cast(pl.Date),
             over=pl.col("over").cast(pl.Int64),
             ball=pl.col("ball").cast(pl.Int64),
             wicket=pl.col("wicket.player_out")
@@ -77,7 +78,7 @@ def aggregate_input_data(df: pl.DataFrame) -> pl.DataFrame:
     """
 
     df = (
-        df.group_by(["team", "matchid", "innings", "over", "ball"])
+        df.group_by(["team", "dates", "matchid", "innings", "over", "ball"])
         .agg(runs=pl.col("runs.total").sum(), wickets=pl.col("wicket").sum())
         .with_columns(
             total_runs=pl.col("runs").cum_sum().over(["team", "matchid"], order_by=["over", "ball"]),

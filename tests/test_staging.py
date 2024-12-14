@@ -64,6 +64,9 @@ def test_join_input_data(joined_data, expected):
     assert df["over"].dtype == pl.Int64
     assert df["ball"].dtype == pl.Int64
 
+    # date column conversion
+    assert df["dates"].dtype == pl.Date
+
     # testing that there are no situations where the wicket.player_out isn't going to
     # cause downstream errors
     group_cols = ["matchid", "over", "innings", "team"]

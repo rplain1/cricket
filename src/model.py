@@ -5,7 +5,6 @@ from config import MODEL_INPUT_PATH
 import logging
 import numpy as np
 
-# Configure logging
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
@@ -36,31 +35,31 @@ def simple_time_series_split(data: pl.DataFrame) -> dict:
     return {"train_idx": train_idx, "val_idx": val_idx, "test_idx": test_idx}
 
 
-def split_train_test(data: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+def split_train_test(data: pl.DataFrame) -> tuple[np.ndarray, np.ndarray]:
     """
     Simple function to split X and y
 
     Args:
-        data (np.nDarry)
+        data (pl.DataFrame) model input data
 
     Returns:
         Tuple[numpy.ndarray, numpy.ndarray]: tuple of X and y arrays
 
     """
-    return data[:, :-1], data[:, -1]
+    X = data.select(pl.exclude("runs")).to_numpy()
+    y = data.select("runs").to_numpy().flatten()
+
+    return X, y
 
 
-def train_model(data_path):
-    # TODO: need a better soruce
-    data = pl.read_csv(data_path, schema_overrides={"dates": pl.Date})
-    data = data.select(["dates", "innings", "ball", "wickets_remaining", "runs"])
+def train_model(data):
     date_idx = simple_time_series_split(data)
 
     train_data = data.filter(pl.col("dates").is_in(date_idx["train_idx"]))
     val_data = data.filter(pl.col("dates").is_in(date_idx["val_idx"]))
 
-    train_data = train_data.drop("dates").to_numpy()
-    val_data = val_data.drop("dates").to_numpy()
+    train_data = train_data.drop("dates")
+    val_data = val_data.drop("dates")
 
     X_train, y_train = split_train_test(train_data)
     X_val, y_val = split_train_test(val_data)
@@ -79,4 +78,6 @@ def train_model(data_path):
 
 
 if __name__ == "__main__":
-    train_model(data_path=MODEL_INPUT_PATH)
+    data = pl.read_parquet(MODEL_INPUT_PATH)
+    data = data.select(["dates", "over", "ball", "wickets_remaining", "runs"])
+    train_model(data)

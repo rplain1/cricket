@@ -61,6 +61,7 @@ def split_feature_target(data: pl.DataFrame, target="runs") -> tuple[np.ndarray,
         Tuple[numpy.ndarray, numpy.ndarray]: tuple of X and y arrays
 
     """
+    assert target in data.columns, f"{target} column not in dataset"
     X = data.select(pl.exclude(target)).to_numpy()
     y = data.select(target).to_numpy().flatten()
 

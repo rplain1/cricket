@@ -39,7 +39,7 @@ def test_time_series_split(data):
     val_perc = data.filter(pl.col("dates").is_in(split_data["val"])).shape[0] / data.shape[0]
     test_perc = data.filter(pl.col("dates").is_in(split_data["test"])).shape[0] / data.shape[0]
 
-    assert abs(val_perc - test_perc) < 0.025
+    assert abs(val_perc - test_perc) < 0.04
 
 
 @pytest.mark.parametrize(

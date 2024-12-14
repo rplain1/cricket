@@ -21,33 +21,15 @@ import joblib
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
-def time_series_split(data: pl.DataFrame, key="dates") -> dict:
-    """
-    Perform a simple split of the data to prevent data leakage as the model is
-    dealing with time series data.
+def split_data(data: pl.DataFrame):
+    data = data.sort(by=data.columns).with_row_index()
 
-    Args:
-        data: (pl.DataFrame): input dataset
+    train = data.sample(fraction=0.7, seed=427)
+    val = data.join(train, on="index", how="anti")
+    test = val.sample(fraction=0.5, seed=527)
+    val = val.join(test, on="index", how="anti")
 
-    Returns:
-        dict: dictionary with train, validation, and test keys and dates
-    """
-
-    # without diving too much into how many games are in each time period
-    # this was a simple approach to get data split into 70/15/15 split
-    date_indices = (
-        data.group_by(key)
-        .len()
-        .sort(key)
-        .with_columns(perc=pl.col("len") / pl.col("len").sum())
-        .with_columns(perc=pl.col("perc").cum_sum())
-    )
-
-    train_idx = date_indices.filter(pl.col("perc") <= 0.7)[key].unique()
-    val_idx = date_indices.filter((pl.col("perc") > 0.7) & (pl.col("perc") <= 0.85))[key].unique()
-    test_idx = date_indices.filter(pl.col("perc") > 0.85)[key].unique()
-
-    return {"train": train_idx, "val": val_idx, "test": test_idx}
+    return {"train": train.drop("index"), "val": val.drop("index"), "test": test.drop("index")}
 
 
 def split_feature_target(data: pl.DataFrame, target="runs") -> tuple[np.ndarray, np.ndarray]:
@@ -69,20 +51,10 @@ def split_feature_target(data: pl.DataFrame, target="runs") -> tuple[np.ndarray,
 
 
 def main(data: pl.DataFrame) -> None:
-    date_idx = time_series_split(data)
-    logging.info(f"Data was split into: {date_idx.keys()}")
+    data = split_data(data)
 
-    data = data.select(["dates", "runs", "over", "ball", "wickets_remaining"])
-
-    for key in date_idx.keys():
-        tmp_data = data.filter(pl.col("dates").is_in(date_idx[key]))
-
-        # removing dates here, although in practice there would likely be
-        # some feature engineering to extract datetime components in the model
-        drop_col = date_idx[key].name
-        tmp_data = tmp_data.drop(drop_col)
-
-        X, y = split_feature_target(tmp_data)
+    for key in data.keys():
+        X, y = split_feature_target(data[key])
         logging.info(f"{key} features: {X.shape}")
         logging.info(f"{key} target: {y.shape}")
 

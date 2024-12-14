@@ -80,8 +80,9 @@ def test_aggregate_data(aggregated_data):
     """
     df = aggregated_data
 
-    assert df["total_runs"].min() >= 0
-    assert df["total_wickets"].min() >= 0
-    assert df["total_wickets"].max() <= 10
-    assert df["over"].min() == 0
-    assert df["over"].max() + 1 == 50, "All 50 overs not represented"
+    assert df["team"].dtype == pl.String
+    assert df["innings"].n_unique() == 2
+    assert df["wickets_remaining"].max() <= 10
+    assert df["wickets_remaining"].min() == 0
+    assert df["overs_remaining"].min() == 0
+    assert df["overs_remaining"].max() == 49

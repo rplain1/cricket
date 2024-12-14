@@ -96,29 +96,9 @@ def aggregate_input_data(df: pl.DataFrame) -> pl.DataFrame:
             total_wickets=pl.col("wickets").cum_sum().over(["team", "matchid"], order_by=["over", "ball"]),
         )
         .with_columns(overs_remaining=50 - pl.col("over") - 1, wickets_remaining=10 - pl.col("total_wickets"))
-    )
+    ).select(["team", "innings", "overs_remaining", "wickets_remaining", "runs"])
 
     return df
-
-
-def question_3a(df: pl.DataFrame) -> None:
-    """
-    Create the final dataframe to answer question 3.a
-
-    Use the ball-by-ball summaries under the innings descriptions of each men’s
-    match to make a dataset with the run and wicket outcomes for each delivery
-    in a match, excluding matches with no result. Save your intermediate data
-    with team, inning order, remaining overs, and remaining wickets to a JSON or
-    CSV file
-
-    Args:
-        df (pl.DataFrame): data from `aggregate_input_data()`
-
-    Returns:
-        None
-    """
-
-    df.select(["team", "innings", "overs_remaining", "wickets_remaining"]).write_csv("report/q3a.csv")
 
 
 def main() -> None:
@@ -134,7 +114,8 @@ def main() -> None:
         1. Retrieves match and innings data using `get_input_data()`.
         2. Joins the data with `join_input_data()`.
         3. Aggregates the data using `aggregate_input_data()`.
-        4. Writes the final aggregated data to a JSON file.
+        4. Writes the final aggregated data to a CSV file.
+        5. Writes the dataset for 3a
 
     Returns:
         None
@@ -149,8 +130,7 @@ def main() -> None:
     df = join_input_data(match_results_df, innings_results_df)
     df = aggregate_input_data(df)
     df.write_parquet(f"{OUTPUT_DIR}/transformed_data.parquet")
-
-    question_3a(df)
+    df.select(["team", "innings", "overs_remaining", "wickets_remaining"]).write_csv("report/q3a.csv")
 
 
 if __name__ == "__main__":

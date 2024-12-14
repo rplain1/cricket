@@ -3,7 +3,7 @@ import os
 import convert_file
 
 INPUT_DIR = "data"
-OUTPUT_DIR = "report"
+OUTPUT_DIR = "staged_data"
 assert os.path.exists(INPUT_DIR), "'data/' doesn't exits"
 
 """
@@ -90,6 +90,26 @@ def aggregate_input_data(df: pl.DataFrame) -> pl.DataFrame:
     return df
 
 
+def question_3a(df: pl.DataFrame) -> None:
+    """
+    Create the final dataframe to answer question 3.a
+
+    Use the ball-by-ball summaries under the innings descriptions of each men’s
+    match to make a dataset with the run and wicket outcomes for each delivery
+    in a match, excluding matches with no result. Save your intermediate data
+    with team, inning order, remaining overs, and remaining wickets to a JSON or
+    CSV file
+
+    Args:
+        df (pl.DataFrame): data from `aggregate_input_data()`
+
+    Returns:
+        None
+    """
+
+    df.select(["team", "innings", "overs_remaining", "wickets_remaining"]).write_csv("report/q3a.csv")
+
+
 def main() -> None:
     """
     Main function to process input data, join, aggregate, and save the results.
@@ -117,7 +137,9 @@ def main() -> None:
     match_results_df, innings_results_df = get_input_data()
     df = join_input_data(match_results_df, innings_results_df)
     df = aggregate_input_data(df)
-    df.write_csv(f"{OUTPUT_DIR}/q3a.csv")
+    df.write_parquet(f"{OUTPUT_DIR}/stage_data.parquet")
+
+    question_3a(df)
 
 
 if __name__ == "__main__":

@@ -1,15 +1,26 @@
+"""
+I'm using this script to handle the transforming the extracted data into valid
+business logic. This layer should contain anything related to Cricket, and creating
+datasets that can help answer the questions we are trying to solve for.
+
+Because I had already gotten started on this, the `extract` method I chose with
+duckdb caused too much unnesting. There were duplicated rows for a ball because of
+wicket.player_out. I handled the filtering here, but that should probably get moved
+upstream if there was more time allocated to the project.
+
+Question 3a. is handled here. I just outputted it as a step in this process, it's
+unlikely a request would be needed like this in production environment. I wasn't sure
+of the best way to do that, but it is unlikely you would need something like this
+in production that unit testing couldn't handle.
+"""
+
 import polars as pl
 import os
-import convert_file
+import extract
 
-INPUT_DIR = "data"
-OUTPUT_DIR = "staged_data"
-assert os.path.exists(INPUT_DIR), "'data/' doesn't exits"
-
-"""
-I'm using this script to handle the ETL/ELT of getting the source data into the
-model input data needed downstrem.
-"""
+INPUT_DIR = "data/extracted"
+OUTPUT_DIR = "data/transformed"
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 
 def get_input_data() -> tuple[pl.DataFrame, pl.DataFrame]:
@@ -132,12 +143,12 @@ def main() -> None:
     innings = os.path.isfile(f"{INPUT_DIR}/innings_results.parquet")
 
     if not all([matches, innings]):
-        convert_file.main()
+        extract.main()
 
     match_results_df, innings_results_df = get_input_data()
     df = join_input_data(match_results_df, innings_results_df)
     df = aggregate_input_data(df)
-    df.write_parquet(f"{OUTPUT_DIR}/stage_data.parquet")
+    df.write_parquet(f"{OUTPUT_DIR}/transformed_data.parquet")
 
     question_3a(df)
 

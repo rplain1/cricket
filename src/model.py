@@ -6,7 +6,6 @@ using features like over that have a numeric representation but nominal meaning,
 really effective at doing that. I would have to do n=1
 """
 
-import polars as pl
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_squared_error

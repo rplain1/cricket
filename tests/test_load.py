@@ -1,5 +1,5 @@
 import pytest
-from load import time_series_split
+from load import time_series_split, split_feature_target
 import polars as pl
 import numpy as np
 
@@ -40,3 +40,36 @@ def test_time_series_split(data):
     test_perc = data.filter(pl.col("dates").is_in(split_data["test"])).shape[0] / data.shape[0]
 
     assert abs(val_perc - test_perc) < 0.025
+
+
+@pytest.mark.parametrize(
+    "data, should_raise",
+    [
+        (  # This is expected to pass
+            pl.DataFrame(
+                {
+                    "runs": [x for x in range(4)],
+                    "test_col": [x**x for x in range(4)],
+                }
+            ),
+            False,
+        ),
+        (  # This is expected to raise an error (target column is missing)
+            pl.DataFrame(
+                {
+                    "dates": np.random.randint(low=0, high=100, size=527),
+                    "test_col": [x for x in range(527)],
+                }
+            ),
+            True,
+        ),
+    ],
+)
+def test_split_feature_target(data, should_raise):
+    if should_raise:
+        with pytest.raises(AssertionError):
+            X, y = split_feature_target(data)
+    else:
+        X, y = split_feature_target(data, target="runs")
+        assert X.shape == (4, 1)
+        assert y.shape == (4,)

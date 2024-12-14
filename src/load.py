@@ -71,7 +71,7 @@ def main(data: pl.DataFrame) -> None:
     date_idx = time_series_split(data)
     logging.info(f"Data was split into: {date_idx.keys()}")
 
-    data = data.select(["dates", "runs", "over", "wickets_remaining"])
+    data = data.select(["dates", "runs", "over", "ball", "wickets_remaining"])
 
     for key in date_idx.keys():
         tmp_data = data.filter(pl.col("dates").is_in(date_idx[key]))

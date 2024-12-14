@@ -6,6 +6,11 @@ INPUT_DIR = "data"
 OUTPUT_DIR = "report"
 assert os.path.exists(INPUT_DIR), "'data/' doesn't exits"
 
+"""
+I'm using this script to handle the ETL/ELT of getting the source data into the
+model input data needed downstrem.
+"""
+
 
 def get_input_data() -> tuple[pl.DataFrame, pl.DataFrame]:
     """
@@ -50,11 +55,11 @@ def join_input_data(match_results_df: pl.DataFrame, innings_results_df: pl.DataF
         .with_columns(pl.col("over").str.split_exact(".", 1).struct.rename_fields(["over", "ball"]))
         .unnest("over")
         .with_columns(
-            over=pl.col("over").cast(pl.UInt8),
-            ball=pl.col("ball").cast(pl.UInt8),
+            over=pl.col("over").cast(pl.Int64),
+            ball=pl.col("ball").cast(pl.Int64),
             wicket=pl.col("wicket.player_out")
             .is_not_null()
-            .cast(pl.UInt8),  # unnesting like I did caused multiple rows for wicket player
+            .cast(pl.Int64),  # unnesting like I did caused multiple rows for wicket player
             rn=pl.col("wicket.player_out").rank("ordinal").over(["matchid", "over", "innings", "team"]),
         )
         .filter(pl.col("rn") == 1)
@@ -89,7 +94,7 @@ def main() -> None:
     Main function to process input data, join, aggregate, and save the results.
 
     This function retrieves match and innings result data, performs a join operation on the data,
-    aggregates the resulting DataFrame, and writes the final report as a JSON file.
+    aggregates the resulting DataFrame, and writes the final report as a CSV file.
 
     Used to answer question 3a
 

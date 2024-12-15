@@ -1,7 +1,9 @@
 import joblib
 import polars as pl
+import polars.selectors as cs
 import argparse
 from sklearn.neighbors import KNeighborsRegressor
+from sklearn.preprocessing import StandardScaler
 
 
 def load_model(model_path: str) -> KNeighborsRegressor:
@@ -33,6 +35,39 @@ def load_data(data_path: str) -> pl.DataFrame:
     return pl.read_csv(data_path) if data_path.endswith(".csv") else pl.read_json(data_path)
 
 
+def preprocess_data(data: pl.DataFrame) -> pl.DataFrame:
+    """
+    Handles missing values and applies any necessary preprocessing steps before prediction.
+
+    Args:
+        data (pl.DataFrame): raw input data to be preprocessed
+
+    Returns:
+        pl.DataFrame: preprocessed data ready for prediction
+    """
+    required_columns = ["innings", "overs_remaining", "wickets_remaining"]
+    try:
+        missing_columns = [col for col in required_columns if col not in data.columns]
+        assert not missing_columns, f"Missing columns: {missing_columns}"
+    except AssertionError as e:
+        raise ValueError(f"Dataset validation failed: {e}")
+
+    features = data.with_columns(cs.numeric().fill_null(strategy="mean"))
+
+    if (data.null_count() == data.shape[0]).sum_horizontal().min() > 0:
+        raise ValueError("One or more columns contain all null values after preprocessing.")
+
+    if (data.null_count() == data.shape[0]).sum_horizontal().min() > 0:
+        raise ValueError("One or more columns contain all null values after preprocessing.")
+
+    features = features.select(required_columns)
+
+    scaler = StandardScaler()
+    features = scaler.fit_transform(features)
+
+    return features
+
+
 def predict(model: KNeighborsRegressor, data: pl.DataFrame) -> pl.DataFrame:
     """
     Runs the model on the new data for predictions. Before making predictions,
@@ -45,15 +80,8 @@ def predict(model: KNeighborsRegressor, data: pl.DataFrame) -> pl.DataFrame:
     Returns:
         pl.DataFrame: `data` object with a new column added for predicted values
     """
-    required_columns = ["innings", "overs_remaining", "wickets_remaining"]
 
-    try:
-        missing_columns = [col for col in required_columns if col not in data.columns]
-        assert not missing_columns, f"Missing columns: {missing_columns}"
-    except AssertionError as e:
-        raise ValueError(f"Dataset validation failed: {e}")
-
-    features = data.select(required_columns)
+    features = preprocess_data(data)
     predictions = model.predict(features)
 
     return data.with_columns(pred_runs=predictions)

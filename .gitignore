@@ -11,7 +11,7 @@ wheels/
 
 # Raw data
 *.json
-
+data/
 # Misc
 .DS_Store
 

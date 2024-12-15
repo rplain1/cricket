@@ -2,6 +2,7 @@ import os
 import logging
 import joblib
 import polars as pl
+import random
 import extract
 import transform
 import load
@@ -15,6 +16,7 @@ def main():
     """
     Main function to orchestrate the data pipeline: extract, transform, train, and predict.
     """
+    random.seed(527)
     try:
         # Step 1: Data Extraction
         logging.info("Extracting data...")

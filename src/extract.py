@@ -1,4 +1,5 @@
 import duckdb
+from pathlib import Path
 
 # this was the quickest way for me to deal with the json data
 # and get it into a dataframe. I like to use duckdb for I/O wherever
@@ -8,6 +9,8 @@ import duckdb
 
 
 def main() -> None:
+    out_dir = Path("data/extracted/")
+    out_dir.mkdir(exist_ok=True, parents=True)
     """
     Convert the nested json input data into a parquet format that is in the form
     of a 2 dimensional table.

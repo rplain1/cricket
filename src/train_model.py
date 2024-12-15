@@ -30,21 +30,18 @@ def load_data(path=MODEL_INPUT_PATH) -> dict:
         "test_target.pkl",
     ]
 
-    # Check if all files exist
     missing_files = [file for file in datasets if not Path(os.path.join(path, file)).is_file()]
     if missing_files:
         raise FileNotFoundError(f"Missing the following files: {', '.join(missing_files)}")
 
-    # Load all datasets into a dictionary
     data = {}
     for file in datasets:
-        dataset_name = file.split(".")[0]  # create key for dataset
+        dataset_name = file.split(".")[0]
         data[dataset_name] = joblib.load(os.path.join(path, file))
 
     return data
 
 
-# separate validation from having insight of test
 def select_model(data: dict):
     scaler = StandardScaler()
     X_train_val = scaler.fit_transform(np.vstack([data["train_features"], data["val_features"]]))
@@ -72,22 +69,18 @@ def select_model(data: dict):
 
 
 def train_model(data, model, params):
-    # Combine training and validation data
     X_train_full = np.concatenate([data["train_features"], data["val_features"]])
     y_train_full = np.concatenate([data["train_target"], data["val_target"]])
 
-    # Standardize the full training set
     scaler = StandardScaler()
     X_train_full = scaler.fit_transform(X_train_full)
     X_test = scaler.transform(data["test_features"])
 
     model.fit(X_train_full, y_train_full)
 
-    # Evaluate on the training set
     train_pred = model.predict(X_train_full)
     train_mse = mean_squared_error(y_train_full, train_pred)
 
-    # Evaluate on the test set
     test_pred = model.predict(X_test)
     test_mse = mean_squared_error(data["test_target"], test_pred)
 

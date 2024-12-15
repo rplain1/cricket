@@ -25,6 +25,11 @@ def main() -> None:
         TO 'data/extracted/innings_results.parquet' (FORMAT PARQUET);
     """)
 
+    duckdb.execute("""
+    COPY (select distinct teams from read_json('data/raw-data/match_results.json'))
+    TO 'data/extracted/teams.csv' (FORMAT CSV)
+    """)
+
 
 if __name__ == "__main__":
     main()

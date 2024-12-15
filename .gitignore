@@ -10,8 +10,8 @@ wheels/
 .venv
 
 # Raw data
-data/
-report/
+*.json
+
 # Misc
 .DS_Store
 

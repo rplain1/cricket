@@ -116,6 +116,7 @@ def main() -> None:
         3. Aggregates the data using `aggregate_input_data()`.
         4. Writes the final aggregated data to a CSV file.
         5. Writes the dataset for 3a
+        6. Write Ireland test case data
 
     Returns:
         None
@@ -131,6 +132,7 @@ def main() -> None:
     df = aggregate_input_data(df)
     df.write_parquet(f"{OUTPUT_DIR}/transformed_data.parquet")
     df.select(["team", "innings", "overs_remaining", "wickets_remaining"]).write_csv("report/q3a.csv")
+    df.filter(pl.col("team") == "Ireland").sample(n=5).drop("runs").write_csv("report/ireland_first_5_overs.csv")
 
 
 if __name__ == "__main__":

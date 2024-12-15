@@ -53,7 +53,7 @@ def select_model(data: dict):
     val_metrics = {}
 
     # Iterate over different values of n_neighbors to find the best value
-    for n in range(1, 10):
+    for n in range(5, 30):
         model = KNeighborsRegressor(n_neighbors=n)
         model.fit(X_train, y_train)
 

@@ -8,6 +8,7 @@ would be appropriate for this, but that is why I chose it.
 
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsRegressor
+from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import mean_squared_error
 import logging
 import numpy as np
@@ -43,36 +44,34 @@ def load_data(path=MODEL_INPUT_PATH) -> dict:
     return data
 
 
-# TODO: could implement grid search
+# separate validation from having insight of test
 def select_model(data: dict):
-    # Standardize data
     scaler = StandardScaler()
-    X_train = scaler.fit_transform(data["train_features"])
-    X_val = scaler.transform(data["val_features"])
-    y_train, y_val = data["train_target"], data["val_target"]
+    X_train_val = scaler.fit_transform(np.vstack([data["train_features"], data["val_features"]]))
+    y_train_val = np.concatenate([data["train_target"], data["val_target"]])
 
-    val_metrics = {}
+    # Define the model and parameter grid
+    model = KNeighborsRegressor()
+    param_grid = {"n_neighbors": np.arange(5, 30)}
 
-    # Iterate over different values of n_neighbors to find the best value
-    for n in range(5, 30):
-        model = KNeighborsRegressor(n_neighbors=n)
-        model.fit(X_train, y_train)
+    grid_search = GridSearchCV(
+        estimator=model,
+        param_grid=param_grid,
+        scoring="neg_mean_squared_error",
+        cv=5,
+        verbose=1,
+    )
+    grid_search.fit(X_train_val, y_train_val)
+    best_n_neighbors = grid_search.best_params_["n_neighbors"]
 
-        # Predict and calculate MSE on validation set
-        val_pred = model.predict(X_val)
-        val_mse = mean_squared_error(y_val, val_pred)
+    best_score = -grid_search.best_score_
+    logging.info(f"Best model selected: {best_n_neighbors} neighbors with MSE: {best_score:.4f}")
+    best_model = grid_search.best_estimator_
 
-        logging.info(f"Validation MSE for {n} neighbors: {val_mse:.4f}")
-        val_metrics[n] = val_mse
-
-    # Select the best parameter for neighbors
-    best_n_neighbors = min(val_metrics, key=val_metrics.get)
-    logging.info(f"Best model selected: {best_n_neighbors} neighbors")
-
-    return best_n_neighbors
+    return best_model, grid_search.best_params_
 
 
-def train_model(data, best_n_neighbors):
+def train_model(data, model, params):
     # Combine training and validation data
     X_train_full = np.concatenate([data["train_features"], data["val_features"]])
     y_train_full = np.concatenate([data["train_target"], data["val_target"]])
@@ -82,8 +81,6 @@ def train_model(data, best_n_neighbors):
     X_train_full = scaler.fit_transform(X_train_full)
     X_test = scaler.transform(data["test_features"])
 
-    # Initialize and train the model with the best hyperparameter
-    model = KNeighborsRegressor(n_neighbors=best_n_neighbors)
     model.fit(X_train_full, y_train_full)
 
     # Evaluate on the training set
@@ -94,8 +91,8 @@ def train_model(data, best_n_neighbors):
     test_pred = model.predict(X_test)
     test_mse = mean_squared_error(data["test_target"], test_pred)
 
-    logging.info(f"Final model - {best_n_neighbors} neighbors TRAIN MSE: {train_mse:.4f}")
-    logging.info(f"Final model - {best_n_neighbors} neighbors TEST MSE: {test_mse:.4f}")
+    logging.info(f"Final model - {params[list(params.keys())[0]]} neighbors TRAIN MSE: {train_mse:.4f}")
+    logging.info(f"Final model - {params[list(params.keys())[0]]} neighbors TEST MSE: {test_mse:.4f}")
 
     out_dir = Path("models/")
     out_dir.mkdir(exist_ok=True, parents=True)
@@ -104,4 +101,5 @@ def train_model(data, best_n_neighbors):
 
 if __name__ == "__main__":
     data = load_data()
-    train_model(data, select_model(data))
+    model, params = select_model(data)
+    train_model(data, model, params)

@@ -8,10 +8,8 @@ duckdb caused too much unnesting. There were duplicated rows for a ball because 
 wicket.player_out. I handled the filtering here, but that should probably get moved
 upstream if there was more time allocated to the project.
 
-Question 3a. is handled here. I just outputted it as a step in this process, it's
-unlikely a request would be needed like this in production environment. I wasn't sure
-of the best way to do that, but it is unlikely you would need something like this
-in production that unit testing couldn't handle.
+Question 3a. is handled here. I outputted it as a step in this process, it's
+unlikely a request would be needed like this in production environment.
 """
 
 import polars as pl

@@ -1,12 +1,9 @@
 """
 I wanted to use KNN to do keep the model object as simple as possible, while also
 having a meaningful parameter to tune. In development, I looked to see if I could
-identify a bias-variance tradeoff to use. Becuase I didn't do any feature engineering,
-using features like over that have a numeric representation but nominal meaning, it wasn't
-really effective at doing that. I would have to do n=1
-
-could have used GridSearchCV, but already had spent time creating the time serise
-split for training, validation, and testing.
+identify a bias-variance tradeoff and use that range. Becuase I didn't do any
+feature engineering, it wasn't really effective at doing that. I don't think KNN
+would be appropriate for this, but that is why I chose it.
 """
 
 from sklearn.preprocessing import StandardScaler
@@ -46,6 +43,7 @@ def load_data(path=MODEL_INPUT_PATH) -> dict:
     return data
 
 
+# TODO: could implement grid search
 def select_model(data: dict):
     # Standardize data
     scaler = StandardScaler()

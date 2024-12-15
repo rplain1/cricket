@@ -1,15 +1,16 @@
 """
+This part I spent too much time on, and had to come back and trim it down after
+better understanding the requirements. Because there was a time component in the
+data, I first sought to do a custom split on `matchid` and `dates`, that would prevent
+data leakage. I still think that is the appropriate next step for the project, but
+given the requirements and recommended time to spend on this, I think this is about
+right.
+
 This is to take the data that is staged, and save files for TRAINING, VALIDATION,
-and TESTING. I will be writing these into parquet files. This layer should be free
-of buisness logic, and focus on preparing staged data for modeling.
-
-I'm doing a custom split here, with the idea being that the data has a time time
-series component, and you need to adjust for data leakage. With more time, the model
-might have a time component added, and you could do a rolling time series cross valdiattion.
-
-This is a simple approach, but I also wanted to do something more robust than
-sci-kit learns `train_test_split()`
-
+and TESTING (would have just done TRAINING/TESTING and used GridSearchCV in `train_model.py`
+now that I better understand the requirements). I will be writing these into
+parquet files. This layer should be free of buisness logic, and focus on preparing
+staged data for modeling.å
 """
 
 from pathlib import Path
@@ -21,7 +22,16 @@ import joblib
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
-def split_data(data: pl.DataFrame):
+def split_data(data: pl.DataFrame) -> dict[pl.DataFrame, pl.DataFrame, pl.dataframe]:
+    """
+    Split the data into training, testing, and validation sets.
+
+    Args:
+        data (pl.DataFrame): total available training data
+
+    Returns:
+        dict: dictionary with 3 keys for train, val, and test
+    """
     data = data.sort(by=data.columns).with_row_index()
 
     train = data.sample(fraction=0.7, seed=427)
@@ -51,6 +61,19 @@ def split_feature_target(data: pl.DataFrame, target="runs") -> tuple[np.ndarray,
 
 
 def main(data: pl.DataFrame) -> None:
+    """
+    Main function to take in the input data, and run the split operations to
+    create the features and targets for model training.
+
+    Steps:
+        1. split the data into training, validation, testing
+        2. for each set, split the features and targets into separate numpy
+           arrays
+        3. Save the numpy objects to `model-prep/` for training
+
+    Returns:
+        None
+    """
     data = split_data(data)
 
     for key in data.keys():

@@ -15,6 +15,7 @@ unlikely a request would be needed like this in production environment.
 import polars as pl
 import os
 import extract
+from pathlib import Path
 
 INPUT_DIR = "data/extracted"
 OUTPUT_DIR = "data/transformed"
@@ -128,9 +129,10 @@ def main() -> None:
     match_results_df, innings_results_df = get_input_data()
     df = join_input_data(match_results_df, innings_results_df)
     df = aggregate_input_data(df)
+    df = df.sort(["team", "innings", "overs_remaining", "wickets_remaining"])
     df.write_parquet(f"{OUTPUT_DIR}/transformed_data.parquet")
     df.select(["team", "innings", "overs_remaining", "wickets_remaining"]).write_csv("report/q3a.csv")
-    df.filter(pl.col("team") == "Ireland").sample(n=5).drop("runs").write_csv("report/ireland_first_5_overs.csv")
+    df.filter(pl.col("team") == "Ireland").slice(1, 5).drop("runs").write_csv("report/ireland_first_5_overs.csv")
 
 
 if __name__ == "__main__":

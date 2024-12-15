@@ -19,17 +19,17 @@ def main() -> None:
         None
     """
     duckdb.execute("""
-        COPY (SELECT * FROM 'data/raw-data/match_results.json')
+        COPY (SELECT * FROM 'raw-data/match_results.json')
         TO 'data/extracted/match_results.parquet' (FORMAT PARQUET);
     """)
 
     duckdb.execute("""
-        COPY (from read_json('data/raw-data/innings_results.json', maximum_depth = -1, sample_size = -1))
+        COPY (from read_json('raw-data/innings_results.json', maximum_depth = -1, sample_size = -1))
         TO 'data/extracted/innings_results.parquet' (FORMAT PARQUET);
     """)
 
     duckdb.execute("""
-    COPY (select distinct teams from read_json('data/raw-data/match_results.json'))
+    COPY (select distinct teams from read_json('raw-data/match_results.json'))
     TO 'data/extracted/teams.csv' (FORMAT CSV)
     """)
 

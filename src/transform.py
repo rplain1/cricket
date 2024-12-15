@@ -15,7 +15,6 @@ unlikely a request would be needed like this in production environment.
 import polars as pl
 import os
 import extract
-from pathlib import Path
 
 INPUT_DIR = "data/extracted"
 OUTPUT_DIR = "data/transformed"

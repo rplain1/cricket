@@ -24,6 +24,11 @@ def test_real_data(test_data, model):
     assert isinstance(df, pl.DataFrame)
 
 
+def test_preprocess_data_normal(test_data):
+    data = preprocess_data(test_data)
+    isinstance(data, pl.DataFrame)
+
+
 def test_predictions_valid_output(test_data, model):
     df = predict(model, test_data)
 
@@ -35,4 +40,10 @@ def test_predictions_valid_output(test_data, model):
 def test_null_input(test_data, model):
     test_data = test_data.with_columns(innings=pl.lit(None))
     with pytest.raises(ValueError, match="One or more columns contain all null values after preprocessing."):
+        predict(model, test_data)
+
+
+def test_unknown_team(test_data, model):
+    test_data[1, "team"] = "NEW TEAM"
+    with pytest.raises(ValueError, match="One or more teams is outside league of training data."):
         predict(model, test_data)

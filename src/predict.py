@@ -4,6 +4,7 @@ import polars.selectors as cs
 import argparse
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.preprocessing import StandardScaler
+import os
 
 
 def load_model(model_path: str) -> KNeighborsRegressor:
@@ -57,8 +58,9 @@ def preprocess_data(data: pl.DataFrame) -> pl.DataFrame:
     if (data.null_count() == data.shape[0]).sum_horizontal().min() > 0:
         raise ValueError("One or more columns contain all null values after preprocessing.")
 
-    if (data.null_count() == data.shape[0]).sum_horizontal().min() > 0:
-        raise ValueError("One or more columns contain all null values after preprocessing.")
+    train_teams = pl.read_csv(os.path.join("data", "extracted", "teams.csv"))
+    if not data["team"].is_in(train_teams["teams"]).all():
+        raise ValueError("One or more teams is outside league of training data.")
 
     features = features.select(required_columns)
 

@@ -1,13 +1,9 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 import joblib
-from pathlib import Path
-import os
 from train_model import load_data, select_model, train_model
-import numpy as np
 from sklearn.datasets import make_regression
 from sklearn.neighbors import KNeighborsRegressor
-import polars as pl
 
 
 def test_load_data_all_files_present(tmp_path):

@@ -9,13 +9,13 @@ really effective at doing that. I would have to do n=1
 from sklearn.preprocessing import StandardScaler
 from sklearn.neighbors import KNeighborsRegressor
 from sklearn.metrics import mean_squared_error
-from config import MODEL_INPUT_PATH
 import logging
 import numpy as np
 import joblib
 import os
 from pathlib import Path
 
+MODEL_INPUT_PATH = "data/model-prep"
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 
 
@@ -52,7 +52,7 @@ def select_model(data: dict):
 
     val_metrics = {}
 
-    # Iterate over different values of n_neighbors to find the best hyperparameter
+    # Iterate over different values of n_neighbors to find the best value
     for n in range(1, 10):
         model = KNeighborsRegressor(n_neighbors=n)
         model.fit(X_train, y_train)
@@ -64,7 +64,7 @@ def select_model(data: dict):
         logging.info(f"Validation MSE for {n} neighbors: {val_mse:.4f}")
         val_metrics[n] = val_mse
 
-    # Select the best model (the one with the lowest validation MSE)
+    # Select the best parameter for neighbors
     best_n_neighbors = min(val_metrics, key=val_metrics.get)
     logging.info(f"Best model selected: {best_n_neighbors} neighbors")
 
@@ -96,14 +96,11 @@ def train_model(data, best_n_neighbors):
     logging.info(f"Final model - {best_n_neighbors} neighbors TRAIN MSE: {train_mse:.4f}")
     logging.info(f"Final model - {best_n_neighbors} neighbors TEST MSE: {test_mse:.4f}")
 
-    return model
+    out_dir = Path("models/")
+    out_dir.mkdir(exist_ok=True, parents=True)
+    joblib.dump(model, os.path.join(out_dir, "model.pkl"))
 
 
 if __name__ == "__main__":
-    # data = pl.read_parquet(MODEL_INPUT_PATH)
-    # data = data.select(["dates", "over", "ball", "wickets_remaining", "runs"])
-    # train_model()
     data = load_data()
-    print(data.keys())
-    n = select_model(data)
-    train_model(data, n)
+    train_model(data, select_model(data))

@@ -9,6 +9,15 @@ from pathlib import Path
 
 
 def main() -> None:
+    raw_data_dir = Path("raw-data")
+    match_results_file = raw_data_dir / "match_results.json"
+    innings_results_file = raw_data_dir / "innings_results.json"
+
+    if not match_results_file.exists():
+        raise FileNotFoundError(f"Required file not found: {match_results_file}")
+    if not innings_results_file.exists():
+        raise FileNotFoundError(f"Required file not found: {innings_results_file}")
+
     out_dir = Path("data/extracted/")
     out_dir.mkdir(exist_ok=True, parents=True)
     """

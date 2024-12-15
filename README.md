@@ -1,20 +1,74 @@
 This is to analyze data from https://cricsheet.org/
+Download the data in json format from here and here, into the `raw-data/` directory.
 
-## Part 1
+### Install dependencies
+Use `uv` to setup the environment
 
-## Part 2
+```
+pipx install uv
+uv install
+```
 
-#### Question 2
-I knew as a trivia question, Cricket was the second most popular sport in the wold. Outside of that I had no knowledge of how it worked. It took me longer than I would like to admit understanding the basic rules, since there was a lot of overlapping names with baseball that have completely different meanings.
+### Run the pipeine
+```
+uv run src/main.py
+```
 
-#### Question 3
-##### 3a)
-The output of the dataframe with `team`, `innings`, `overs_remaining`, and `wickets_remaining` can be found under `report/q3a.csv`.
+### Make Predictions
+Once the pipeline has been run, you can make predictions with the following command:
 
-##### 3b)
-The model is developed and trained in `src/train_model.py`.
+```
+python src/predict.py --data report/ireland_first_5_overs.csv --model models/model.pkl --output report/predictions.csv
+```
 
-#### Question 4
+### Run tests
+```
+uv run pytest
+```
 
-#### Question 5
-Tests are under `test/test_model.py`
+### Project Structure
+
+Once the pipeline has been run, the following directories and sub-directories will populate to resemble the following:
+.
+├── README.md
+├── data
+│   ├── extracted
+│   │   ├── innings_results.parquet
+│   │   ├── match_results.parquet
+│   │   └── teams.csv
+│   ├── model-prep
+│   │   ├── test_features.pkl
+│   │   ├── test_target.pkl
+│   │   ├── train_features.pkl
+│   │   ├── train_target.pkl
+│   │   ├── val_features.pkl
+│   │   └── val_target.pkl
+│   └── transformed
+│       └── transformed_data.parquet
+├── models
+│   └── model.pkl
+├── predictions.csv
+├── pyproject.toml
+├── raw-data
+│   ├── innings_results.json
+│   └── match_results.json
+├── report
+│   ├── ireland_first_5_overs.csv
+│   └── q3a.csv
+├── src
+│   ├── __init__.py
+│   ├── extract.py
+│   ├── load.py
+│   ├── main.py
+│   ├── predict.py
+│   ├── train_model.py
+│   └── transform.py
+├── tests
+│   ├── __init__.py
+│   ├── data
+│   │   └── test_data.csv
+│   ├── test_load.py
+│   ├── test_predict.py
+│   ├── test_train_model.py
+│   └── test_transform.py
+└── uv.lock

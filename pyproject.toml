@@ -19,6 +19,3 @@ dev = [
 
 [tool.pytest.ini_options]
 pythonpath = ["src"]
-
-[tool.uv.scripts]
-predict = "python src/predict.py --data report/ireland_first_5_overs.csv --model models/model.pkl --output predictions.csv"

@@ -37,6 +37,9 @@ def main() -> None:
     Returns:
         None
     """
+    # wanted to go with a programatic solution to be able to easily execute in docker
+    # these are the source files from links in the challenge info shared. Covnerted into
+    # the appropriate url
     source_data = {"innings": "1wQO9zr1VH8bY2W4Ca6cMxPdAoPOHo6X6", "match": "19hVoi9f7n7etcmSXx7WHeiDp9pOLpQvN"}
 
     raw_data_dir = Path("raw-data")
@@ -63,6 +66,7 @@ def main() -> None:
     out_dir = Path("data/extracted/")
     out_dir.mkdir(exist_ok=True, parents=True)
 
+    # use duckdb for converting the file from json to parquet
     duckdb.execute("""
         COPY (SELECT * FROM 'raw-data/match_results.json')
         TO 'data/extracted/match_results.parquet' (FORMAT PARQUET);
@@ -73,6 +77,8 @@ def main() -> None:
         TO 'data/extracted/innings_results.parquet' (FORMAT PARQUET);
     """)
 
+    # teams flat file is later used in model testing
+    # ideally there would be a datawarehouse that this would be replaced by
     duckdb.execute("""
     COPY (select distinct teams from read_json('raw-data/match_results.json'))
     TO 'data/extracted/teams.csv' (FORMAT CSV)

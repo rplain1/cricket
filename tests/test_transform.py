@@ -5,16 +5,40 @@ import polars as pl
 
 @pytest.fixture
 def input_data():
+    """
+    Fixture that retrieves input data for the test.
+
+    Returns:
+        tuple: A tuple containing two DataFrames (matches, innings).
+    """
     return get_input_data()
 
 
 @pytest.fixture
 def joined_data(input_data):
+    """
+    Fixture that joins the input data (matches and innings).
+
+    Args:
+        input_data (tuple): A tuple containing two DataFrames (matches, innings).
+
+    Returns:
+        DataFrame: The joined DataFrame with matches and innings data.
+    """
     return join_input_data(input_data[0], input_data[1])
 
 
 @pytest.fixture
 def aggregated_data(joined_data):
+    """
+    Fixture that aggregates the joined data.
+
+    Args:
+        joined_data (DataFrame): The DataFrame containing joined matches and innings data.
+
+    Returns:
+        DataFrame: The aggregated data after applying business logic.
+    """
     return aggregate_input_data(joined_data)
 
 
@@ -24,8 +48,17 @@ def aggregated_data(joined_data):
 )
 def test_get_input_data(input_data, expected):
     """
-    Test `get_input_data()` that it returns valid data for matches
+    Test `get_input_data()` to ensure it returns valid data for matches
     and innings.
+
+    Args:
+        input_data (tuple): A tuple containing two DataFrames (matches, innings).
+        expected (str): Column name to check in innings data.
+
+    Asserts:
+        - The input data for matches and innings is a DataFrame.
+        - The DataFrames are not empty.
+        - The expected column is present in the innings DataFrame.
     """
 
     df_matches = input_data[0]
@@ -52,6 +85,17 @@ def test_join_input_data(joined_data, expected):
 
     Over is represented as a string "0.1", "1.2", "11.3" to represent over and
     ball. These are split to create numeric columns.
+
+    Args:
+        joined_data (DataFrame): The joined data of matches and innings.
+        expected (str): Column name to check in the joined data.
+
+    Asserts:
+        - The joined data is a DataFrame.
+        - Expected columns are present in the DataFrame.
+        - The over and ball columns are properly split into numeric types.
+        - The date column is correctly converted to a Date type.
+        - No issues with duplicate values for `wicket.player_out`.
     """
     df = joined_data
 
@@ -75,8 +119,17 @@ def test_join_input_data(joined_data, expected):
 
 def test_aggregate_data(aggregated_data):
     """
-    Test business logic is working correctly after `aggregate_input_data()`.
-    This ensures all of the values follow the rules of the game.
+    Test business logic after `aggregate_input_data()` to ensure correct
+    aggregation and rule adherence.
+
+    Args:
+        aggregated_data (DataFrame): The aggregated data after applying business rules.
+
+    Asserts:
+        - The team column is a string.
+        - The innings column has exactly two unique values.
+        - Wickets remaining are within valid bounds (0 to 10).
+        - Overs remaining are between 0 and 49.
     """
     df = aggregated_data
 

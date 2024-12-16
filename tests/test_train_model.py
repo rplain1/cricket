@@ -7,6 +7,15 @@ from sklearn.neighbors import KNeighborsRegressor
 
 
 def test_load_data_all_files_present(tmp_path):
+    """
+    Tests if the load_data function correctly loads all required files.
+
+    Args:
+        tmp_path (Path): A temporary directory where test files are stored.
+
+    Asserts:
+        - The returned data contains the correct keys for each dataset.
+    """
     file_names = [
         "train_features.pkl",
         "train_target.pkl",
@@ -31,14 +40,31 @@ def test_load_data_all_files_present(tmp_path):
 
 
 def test_load_data_missing_files(tmp_path):
+    """
+    Tests if the load_data function raises an error when required files are missing.
+
+    Args:
+        tmp_path (Path): A temporary directory where test files are stored.
+
+    Asserts:
+        - Raises a FileNotFoundError if any required files are missing.
+    """
     joblib.dump([], tmp_path / "train_features.pkl")
 
-    # Expect FileNotFoundError
     with pytest.raises(FileNotFoundError, match="Missing the following files"):
         load_data(path=tmp_path)
 
 
 def test_select_model():
+    """
+    Tests the select_model function to ensure it selects the best model and hyperparameters.
+
+    Asserts:
+        - The selected model is of type KNeighborsRegressor.
+        - The best_params is a dictionary.
+        - The dictionary contains the 'n_neighbors' key.
+        - The 'n_neighbors' value is greater than 0.
+    """
     X_train, y_train = make_regression(n_samples=100, n_features=5, noise=0.1)
     X_val, y_val = make_regression(n_samples=30, n_features=5, noise=0.1)
 
@@ -60,6 +86,15 @@ def test_select_model():
 
 @patch("train_model.joblib.dump")
 def test_train_model(mock_dump):
+    """
+    Tests the train_model function to ensure it trains the model and saves it correctly.
+
+    Args:
+        mock_dump: Mocked version of joblib.dump to intercept model saving.
+
+    Asserts:
+        - joblib.dump is called once to save the trained model.
+    """
     X_train, y_train = make_regression(n_samples=100, n_features=5, noise=0.1)
     X_val, y_val = make_regression(n_samples=30, n_features=5, noise=0.1)
     X_test, y_test = make_regression(n_samples=20, n_features=5, noise=0.1)

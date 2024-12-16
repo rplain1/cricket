@@ -1,7 +1,7 @@
 """
 I'm using this script to handle the transforming the extracted data into valid
-business logic. This layer should contain anything related to Cricket, and creating
-datasets that can help answer the questions we are trying to solve for.
+business logic - wait no thats boring, sports logic. This layer should contain
+anything related to Cricket, and creating datasets that can help answer the questions we are trying to solve for.
 
 Because I had already gotten started on this, the `extract` method I chose with
 duckdb caused too much unnesting. There were duplicated rows for a ball because of
@@ -85,7 +85,6 @@ def aggregate_input_data(df: pl.DataFrame) -> pl.DataFrame:
     per `team`, `matchid`, `over`, and `ball`. This is used to to make a dataset
     with the run and wicket outcomes for each delivery in a match.
     """
-
     df = (
         df.group_by(["team", "dates", "matchid", "innings", "over", "ball"])
         .agg(runs=pl.col("runs.total").sum(), wickets=pl.col("wicket").sum())
@@ -93,6 +92,7 @@ def aggregate_input_data(df: pl.DataFrame) -> pl.DataFrame:
             total_runs=pl.col("runs").cum_sum().over(["team", "matchid"], order_by=["over", "ball"]),
             total_wickets=pl.col("wickets").cum_sum().over(["team", "matchid"], order_by=["over", "ball"]),
         )
+        # sports logic for how many wickets and overs remain
         .with_columns(overs_remaining=50 - pl.col("over") - 1, wickets_remaining=10 - pl.col("total_wickets"))
     ).select(["team", "innings", "overs_remaining", "wickets_remaining", "runs"])
 

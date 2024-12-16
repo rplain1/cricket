@@ -21,6 +21,18 @@ logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(
 
 
 def load_data(path=MODEL_INPUT_PATH) -> dict:
+    """
+    Loads training, validation, and test datasets from the specified path.
+
+    Args:
+        path (str): Directory path where dataset files are located.
+
+    Returns:
+        dict: A dictionary containing loaded datasets for features and targets.
+
+    Raises:
+        FileNotFoundError: If any of the required files are missing.
+    """
     datasets = [
         "train_features.pkl",
         "train_target.pkl",
@@ -43,6 +55,18 @@ def load_data(path=MODEL_INPUT_PATH) -> dict:
 
 
 def select_model(data: dict):
+    """
+    Selects the best KNeighborsRegressor model based on cross-validated performance.
+
+    Args:
+        data (dict): A dictionary containing training and validation features and targets.
+
+    Returns:
+        tuple: The best trained model and its parameters.
+
+    Logs:
+        Information about the best model and its performance.
+    """
     scaler = StandardScaler()
     X_train_val = scaler.fit_transform(np.vstack([data["train_features"], data["val_features"]]))
     y_train_val = np.concatenate([data["train_target"], data["val_target"]])
@@ -69,6 +93,18 @@ def select_model(data: dict):
 
 
 def train_model(data, model, params):
+    """
+    Trains the model on the full training and validation dataset, evaluates it on the test set,
+    and saves the trained model.
+
+    Args:
+        data (dict): A dictionary containing training, validation, and test features and targets.
+        model: A machine learning model to be trained.
+        params (dict): Parameters used to configure the model (e.g., number of neighbors).
+
+    Logs:
+        TRAIN and TEST mean squared errors (MSE) of the final model.
+    """
     X_train_full = np.concatenate([data["train_features"], data["val_features"]])
     y_train_full = np.concatenate([data["train_target"], data["val_target"]])
 

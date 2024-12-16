@@ -14,29 +14,33 @@ logging.basicConfig(level=logging.INFO)
 
 def main():
     """
-    Main function to orchestrate the data pipeline: extract, transform, train, and predict.
+    Orchestrates the data pipeline: extraction, transformation, model training, and prediction.
+
+    Steps:
+        1. Extracts data
+        2. Transforms the data
+        3. Loads the data
+        4. Selects and trains the model
+        5. Runs predictions on new data
+
+    Logs the progress and any errors during the pipeline execution.
     """
     random.seed(527)
     try:
-        # Step 1: Data Extraction
         logging.info("Extracting data...")
         extract.main()
 
-        # Step 2: Data Transformation
         logging.info("Transforming data...")
         transformed_data = transform.main()
 
-        # Step 3: Loading data
         transformed_data = pl.read_parquet(os.path.join("data", "transformed", "transformed_data.parquet"))
         load.main(transformed_data)
 
-        # Step 3: Model Training
         logging.info("Training model...")
         data = train_model.load_data()
         _model, _params = train_model.select_model(data)
         train_model.train_model(data, _model, _params)
 
-        # Step 5: Prediction
         logging.info("Running predictions...")
         input_data = predict.load_data(os.path.join("report", "ireland_first_5_overs.csv"))
         model = joblib.load("models/model.pkl")

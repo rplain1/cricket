@@ -9,7 +9,7 @@ right.
 This is to take the data that is staged, and save files for TRAINING, VALIDATION,
 and TESTING (would have just done TRAINING/TESTING and used GridSearchCV in `train_model.py`
 now that I better understand the requirements). I will be writing these into
-parquet files. This layer should be free of buisness logic, and focus on preparing
+parquet files. This layer should be free of sports logic, and focus on preparing
 staged data for modeling.å
 """
 

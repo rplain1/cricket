@@ -21,6 +21,17 @@ import polars as pl
     ],
 )
 def test_split_data(data):
+    """
+    Tests the split_data function to ensure it returns a dictionary with 'train', 'val', and 'test' DataFrames.
+
+    Args:
+        data (pl.DataFrame): The input data to be split.
+
+    Asserts:
+        - Output is a dictionary
+        - Dictionary contains 'train', 'val', and 'test' keys
+        - Values for these keys are pl.DataFrame objects
+    """
     data_dict = split_data(data)
     assert isinstance(data_dict, dict)
     assert all([x in data_dict.keys() for x in ["train", "val", "test"]])
@@ -51,6 +62,17 @@ def test_split_data(data):
     ],
 )
 def test_split_feature_target(data, should_raise):
+    """
+    Tests the split_feature_target function to ensure proper feature and target splitting.
+
+    Args:
+        data (pl.DataFrame): The input data for splitting.
+        should_raise (bool): Indicates if an error is expected.
+
+    Asserts:
+        - If should_raise is True, an AssertionError is raised.
+        - Otherwise, verifies the shapes of the feature and target arrays.
+    """
     if should_raise:
         with pytest.raises(AssertionError):
             X, y = split_feature_target(data)

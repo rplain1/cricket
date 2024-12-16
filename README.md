@@ -1,11 +1,14 @@
-This is to analyze data from https://cricsheet.org/
+# Cricket
 
-This takes the input data of matches results and innings results, and runs a pipeline performs:
-- data ingestion
-- transformation
-- model preprocssesing
-- model training
-- runs model predictions on data sample
+This project is an MVP designed to analyze and model data from [Cricsheet](https://cricsheet.org/).
+
+The pipeline processes match and innings results data through the following steps:
+- Data ingestion
+- Data transformation
+- Model preprocessing
+- Model training
+- Running model predictions on a sample dataset
+
 
 ### Docker
 

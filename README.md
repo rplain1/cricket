@@ -1,7 +1,15 @@
 This is to analyze data from https://cricsheet.org/
-Download the data in json format from here and here, into the `raw-data/` directory.
+
+This takes the input data of matches results and innings results, and runs a pipeline performs:
+- data ingestion
+- transformation
+- model preprocssesing
+- model training
+- runs model predictions on data sample
 
 ### Docker
+
+To run the fully contained solution, you can execute via Docker.
 
 #### Prerequisites
 Ensure that Docker installed on your machine. If you don't have Docker, you can install it from [here](https://docs.docker.com/engine/install/).
@@ -24,6 +32,8 @@ docker run --it cricket
 This is set to run everything needed to build the pipleine, and output sample model predictions.
 
 ### Run locally
+
+If you want to bypass automatic download of the datasets, you can download the data in json format from [here](https://drive.google.com/file/d/19hVoi9f7n7etcmSXx7WHeiDp9pOLpQvN/view?usp=sharing) and [https://drive.google.com/file/d/1wQO9zr1VH8bY2W4Ca6cMxPdAoPOHo6X6/view?usp=sharing], into the `raw-data/` directory.
 
 ### Install dependencies
 Use `uv` to setup the environment. You can find out how to install `uv` [here](https://docs.astral.sh/uv/getting-started/installation/#pypi).

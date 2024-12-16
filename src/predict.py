@@ -119,7 +119,7 @@ def main():
     parser = argparse.ArgumentParser(description="Run predictions using the cricket model")
     parser.add_argument("--data", required=True, help="Path to input data (CSV/JSON)")
     parser.add_argument("--model", required=True, help="Path to model file (PKL)")
-    parser.add_argument("--output", required=True, help="Path to save predictions (CSV)")
+    parser.add_argument("--output", required=False, help="Path to save predictions (CSV)")
 
     args = parser.parse_args()
 
@@ -128,8 +128,8 @@ def main():
 
     predictions = predict(model, data)
 
-    predictions.write_csv(args.output)
-    print("Predictions saved to:", args.output)
+    # predictions.write_csv(args.output)
+    print(predictions)
 
 
 if __name__ == "__main__":

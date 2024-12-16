@@ -1,12 +1,37 @@
 This is to analyze data from https://cricsheet.org/
 Download the data in json format from here and here, into the `raw-data/` directory.
 
-### Install dependencies
-Use `uv` to setup the environment
+### Docker
+
+#### Prerequisites
+Ensure that Docker installed on your machine. If you don't have Docker, you can install it from [here](https://docs.docker.com/engine/install/).
+
+#### Build the Docker Image
+In your project directory, build the Docker image by running:
 
 ```
-pipx install uv
-uv install
+docker build -t cricket .
+```
+
+This command creates an image named cricket using the Dockerfile in the current directory.
+
+#### Run the Docker Container
+To run the container and execute the commands in the Dockerfile, use the following command:
+
+```
+docker run --rm cricket
+```
+The --rm flag will automatically remove the container once it finishes running.
+
+### Run locally
+
+### Install dependencies
+Use `uv` to setup the environment. You can find out how to install `uv` [here](https://docs.astral.sh/uv/getting-started/installation/#pypi).
+
+```
+uv python install
+uv sync
+uv venv source .venv/bin/activate
 ```
 
 ### Run the pipeine
@@ -29,7 +54,9 @@ uv run pytest
 ### Project Structure
 
 Once the pipeline has been run, the following directories and sub-directories will populate to resemble the following:
+```
 .
+├── Dockerfile
 ├── README.md
 ├── data
 │   ├── extracted
@@ -47,13 +74,13 @@ Once the pipeline has been run, the following directories and sub-directories wi
 │       └── transformed_data.parquet
 ├── models
 │   └── model.pkl
-├── predictions.csv
 ├── pyproject.toml
 ├── raw-data
 │   ├── innings_results.json
 │   └── match_results.json
 ├── report
 │   ├── ireland_first_5_overs.csv
+│   ├── predictions.csv
 │   └── q3a.csv
 ├── src
 │   ├── __init__.py
@@ -72,3 +99,4 @@ Once the pipeline has been run, the following directories and sub-directories wi
 │   ├── test_train_model.py
 │   └── test_transform.py
 └── uv.lock
+```

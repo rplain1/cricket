@@ -18,31 +18,21 @@ To run the fully contained solution, you can execute via Docker.
 Ensure that Docker installed on your machine. If you don't have Docker, you can install it from [here](https://docs.docker.com/engine/install/).
 
 
-### Option 1: Execute `run_cricket.sh`
+### Option 1: Docker
 
 ```bash
-chmod +x run_cricket.sh
-./run_cricket.sh
-```
+git clone https://github.com/rplain1/cricket.git
 
-### Option 2: Build the Docker Image
-In your project directory, build the Docker image by running:
+cd cricket || exit
 
-```
 docker build -t cricket .
+
+docker run --rm cricket
 ```
 
-This command creates an image named cricket using the Dockerfile in the current directory.
-
-#### Run the Docker Container
-To run the container and execute the commands in the Dockerfile, use the following command:
-
-```
-docker run --it cricket
-```
 This is set to run everything needed to build the pipleine, and output sample model predictions.
 
-### Option 3: Run locally
+### Option 2: Run locally
 
 If you want to bypass automatic download of the datasets, you can download the data in json format from [here](https://drive.google.com/file/d/19hVoi9f7n7etcmSXx7WHeiDp9pOLpQvN/view?usp=sharing) and [https://drive.google.com/file/d/1wQO9zr1VH8bY2W4Ca6cMxPdAoPOHo6X6/view?usp=sharing], into the `raw-data/` directory.
 

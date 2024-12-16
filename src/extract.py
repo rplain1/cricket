@@ -1,5 +1,6 @@
 import duckdb
 from pathlib import Path
+import gdown
 
 # this was the quickest way for me to deal with the json data
 # and get it into a dataframe. I like to use duckdb for I/O wherever
@@ -9,9 +10,50 @@ from pathlib import Path
 
 
 def main() -> None:
+    """
+    Downloads required JSON files from Google Drive if they do not already exist in the
+    'raw-data' directory, and processes them using DuckDB to extract and save the data
+    into Parquet and CSV formats.
+
+    The function performs the following steps:
+    1. Checks if the files 'match_results.json' and 'innings_results.json' exist in the
+       'raw-data' directory.
+    2. If either of the files is missing, downloads them from Google Drive using the
+       'gdown' package.
+    3. Ensures both 'match_results.json' and 'innings_results.json' exist after
+       downloading. Raises a FileNotFoundError if any file is missing.
+    4. Creates the 'data/extracted/' directory if it doesn't exist.
+    5. Uses DuckDB to:
+        - Copy the content of 'match_results.json' into a Parquet file.
+        - Read and convert 'innings_results.json' to Parquet format with specific
+          parameters on the data structure.
+        - Extract distinct teams from 'match_results.json' and save the result into a
+          CSV file.
+
+    Raises:
+        FileNotFoundError: If the required JSON files are not found after attempting
+        to download them.
+
+    Returns:
+        None
+    """
+    source_data = {"innings": "1wQO9zr1VH8bY2W4Ca6cMxPdAoPOHo6X6", "match": "19hVoi9f7n7etcmSXx7WHeiDp9pOLpQvN"}
+
     raw_data_dir = Path("raw-data")
+    raw_data_dir.mkdir(exist_ok=True)
+
     match_results_file = raw_data_dir / "match_results.json"
     innings_results_file = raw_data_dir / "innings_results.json"
+
+    # Check if the files exist, if not, download them
+    if not match_results_file.exists() or not innings_results_file.exists():
+        print("Downloading missing files...")
+        for file, file_id in source_data.items():
+            url = f"https://drive.google.com/uc?export=download&id={file_id}"
+            output = raw_data_dir / f"{file}_results.json"  # Save as appropriate file
+            gdown.download(url, str(output), quiet=False)
+    else:
+        print("Files already exist. Skipping download.")
 
     if not match_results_file.exists():
         raise FileNotFoundError(f"Required file not found: {match_results_file}")
@@ -20,13 +62,7 @@ def main() -> None:
 
     out_dir = Path("data/extracted/")
     out_dir.mkdir(exist_ok=True, parents=True)
-    """
-    Convert the nested json input data into a parquet format that is in the form
-    of a 2 dimensional table.
 
-    Returns:
-        None
-    """
     duckdb.execute("""
         COPY (SELECT * FROM 'raw-data/match_results.json')
         TO 'data/extracted/match_results.parquet' (FORMAT PARQUET);

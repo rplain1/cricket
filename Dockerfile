@@ -11,7 +11,8 @@ RUN uv sync --frozen
 ENV PATH="/app/.venv/bin:$PATH"
 
 # Default command to show uv commands
-# CMD ["uv", "run"]
+CMD ["uv", "run"]
 
-RUN uv run src/main.py
-RUN uv run python src/predict.py --data report/ireland_first_5_overs.csv --model models/model.pkl
+#RUN uv run src/main.py
+#RUN uv run python src/predict.py --data report/ireland_first_5_overs.csv --model models/model.pkl
+CMD ["uv", "run", "python", "src/main.py", "&&", "uv", "run", "python", "src/predict.py", "--data", "report/ireland_first_5_overs.csv", "--model", "models/model.pkl", "--output", "report/predictions.csv"]

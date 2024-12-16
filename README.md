@@ -19,9 +19,9 @@ This command creates an image named cricket using the Dockerfile in the current 
 To run the container and execute the commands in the Dockerfile, use the following command:
 
 ```
-docker run --rm cricket
+docker run --it cricket
 ```
-The --rm flag will automatically remove the container once it finishes running.
+This is set to run everything needed to build the pipleine, and output sample model predictions.
 
 ### Run locally
 
